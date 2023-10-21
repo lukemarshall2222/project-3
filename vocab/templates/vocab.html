@@ -72,18 +72,15 @@
          <!-- row -->
          <br />
          <div class="row">
-            <!-- <form id="entry">
-               <label for="attempt">Word:</label>
-               <input id="attempt" name="attempt" type="text" width="15"
-                  autocomplete="off"  autofocus />
-            </form> -->
-            <form id="entry" method="POST" action="/_check">
-               <label for="attempt">Word:</label>
-               <input id="attempt" name="attempt" type="text" width="15"
-                  autocomplete="off"  autofocus />
-            </form>
+            <div class="col-xs-6 text-center">
+               <form id="entry">
+                  <label for="attempt">Word:</label>
+                  <input id="attempt" name="attempt" type="text" width="15"
+                     autocomplete="off"  autofocus />
+               </form>
             </div>
          </div>
+         <p id="response"></p>
          <br />
          {% if session.matches|length is not equalto 0  %}
          <h2>You found </h2>
@@ -144,7 +141,6 @@
                          if (matched && in_jumble && !(matches.includes(txt))) {
                            // cool, they found a new word
                            matches.push(txt);
-                            $("#response").html(`${txt} is a match!`);
                             $("#attempt").val("");
                          } else if (matches.includes(txt)) {
                             $("#message").html(`You already found ${txt}`);
