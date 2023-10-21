@@ -72,13 +72,16 @@
          <!-- row -->
          <br />
          <div class="row">
-            <div class="col-xs-6 text-center">
-               <form id="entry" method="POST" action="/_check">
-                  <label for="attempt">Word:</label>
-                  <input id="attempt" name="attempt" type="text" width="15"
-                     autocomplete="off"  autofocus />
-                  <input type="submit" name="try" />
-               </form>
+            <!-- <form id="entry">
+               <label for="attempt">Word:</label>
+               <input id="attempt" name="attempt" type="text" width="15"
+                  autocomplete="off"  autofocus />
+            </form> -->
+            <form id="entry" method="POST" action="/_check">
+               <label for="attempt">Word:</label>
+               <input id="attempt" name="attempt" type="text" width="15"
+                  autocomplete="off"  autofocus />
+            </form>
             </div>
          </div>
          <br />
@@ -99,6 +102,87 @@
          {% endif %}
          {% endwith %}
       </div>
+      <script>
+         // Suppress normal form submission
+         $("#entry").submit( function(event) {
+            event.preventDefault();
+           });
+
+         // On each keystroke, ask the server whether the current
+         // word matches one of the vocab words and has characters within the anagram.
+         //
+         //
+         var matches = [];
+         $("#attempt").keyup(function(event) {
+            var txt = $("#attempt").val();  // Current content of the input field
+            var keycode = event.which;      // They key that just went up
+            var letter = String.fromCharCode(keycode);
+            var debug = True;
+
+            // That letter might not be a letter ... it could be the
+            // the backspace key, or even the shift key, because 'keyup'
+            // catches all kinds of keys.  (Also, the difference between
+            // upper and lower case comes from state of shift key + key code,
+            // so ignoring the shift key we get only the upper case letters.
+
+            if (! "ABCDEFGHIJKLMNOPQRSTUVWXYZ".includes(letter)) { return }
+
+            $.getJSON( "/_check", { text: txt, matches: matches, debug: debug },
+                       function(data) {
+                        // parse the data returned by the flask server function
+                         let in_jumble = data.result.in_jumble;
+                         let matched = data.result.matched;
+                         //let jumble = data.result.jumble;
+                         let target = data.result.target;
+
+                         console.log("in_jumble: " + in_jumble);
+                         console.log("matched: " + matched);
+                         console.log("matches: " + matches);
+                         console.log("target: " + target);
+                         
+
+                         if (matched && in_jumble && !(matches.includes(txt))) {
+                           // cool, they found a new word
+                           matches.push(txt);
+                            $("#response").html(`${txt} is a match!`);
+                            $("#attempt").val("");
+                         } else if (matches.includes(txt)) {
+                            $("#message").html(`You already found ${txt}`);
+                         } else if (!matched) {
+                           $("#message").html(`${txt} isn't in the list of words"`);
+                         } else if (!in_jumble) {
+                           $("#message").html(`${txt} can't be made from the letters ${session.jumble}`)
+                         } else {
+                           $("#message").html("This response shouldn't happen!")
+                           debug = False;
+                         }
+
+                         if (matches.length() >= target) {
+                           window.location.href = "./success.html";
+                         }
+                         /*if matched and in_jumble and not (text in matches):
+                              # Cool, they found a new word
+                              matches.append(text)
+                              flask.session["matches"] = matches
+                           elif text in matches:
+                              flask.flash("You already found {}".format(text))
+                           elif not matched:
+                              flask.flash("{} isn't in the list of words".format(text))
+                           elif not in_jumble:
+                              flask.flash(
+                                    '"{}" can\'t be made from the letters {}'.format(text, jumble))
+                           else:
+                              app.logger.debug("This case shouldn't happen!")
+                              assert False  # Raises AssertionError
+
+                           # Choose page:  Solved enough, or keep going?
+                           if len(matches) >= flask.session["target_count"]:
+                              return flask.redirect(flask.url_for("success"))
+                           else:
+                              return flask.redirect(flask.url_for("keep_going"))*/
+                        }
+                    );
+            });
       <!-- container -->
    </body>
 </html>
