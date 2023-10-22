@@ -90,21 +90,28 @@ def check():
     already found.
     """
     app.logger.debug("Entering check")
-
     # The data we need, from form and from cookie
     text = flask.request.args.get("text", type=str)
+    #app.logger.debug(f"text: {text}")
     jumble = flask.session["jumble"]
+    #app.logger.debug(f"jumble: {jumble}")
     target = flask.session["target_count"]
-    debug = flask.request.args.get(debug, True)
+    #app.logger.debug(f"target: {target}")
+    debug = flask.request.args.get("debug", True)
+    #app.logger.debug(f"debug: {debug}")
     flask.session["matches"] = flask.request.args.get("matches", [])
 
     # Is it good? keep in function
     in_jumble = LetterBag(jumble).contains(text)
     matched = WORDS.has(text)
 
+    
+
     rslt = {"in_jumble": in_jumble, 
             "matched": matched,
-            "target": target}
+            "target": target,
+            "jumble": jumble}
+
     
     if not debug:
         app.logger.debug("This case shouldn't happen!")
